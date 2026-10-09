@@ -1,0 +1,132 @@
+{
+  "version": 8,
+  "name": "DCR Style",
+  "glyphs": "glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "openmaptiles": {
+      "type": "vector",
+      "url": "https://tiles.openfreemap.org/planet"
+    },
+    "contours": {
+      "type": "vector",
+      "tiles": [
+        "dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=3.28084&overzoom=1&thresholds=11*5"
+      ],
+      "maxzoom": 15
+    }
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "background",
+      "paint": {"background-color": "rgba(168, 189, 179, 1)"}
+    },
+    {
+      "id": "park",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "park",
+      "paint": {"fill-color": "rgba(253, 254, 255, 1)"}
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "paint": {"fill-color": "rgba(137, 168, 155, 1)"}
+    },
+    {
+      "id": "waterway",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "waterway",
+      "paint": {"line-color": "rgba(137, 168, 155, 1)", "line-width": 2}
+    },
+    {
+      "id": "contour",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "rgba(0, 102, 73, 0.3)",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.3, 16, 0.8]
+      }
+    },
+    {
+      "id": "road",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": ["all", ["!=", "class", "path"], ["!=", "class", "ferry"]],
+      "paint": {"line-color": "rgba(0, 102, 73, 1)", "line-width": 4}
+    },
+    {
+      "id": "bike",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": ["all", ["==", "class", "path"], ["any", ["==", "bicycle", "yes"], ["==", "bicycle", "designated"], ["==", "subclass", "cycleway"]]],
+      "paint": {
+        "line-color": "rgba(0, 102, 73, 1)",
+        "line-dasharray": [0.1, 0.7],
+        "line-width": 7
+      }
+    },
+    {
+      "id": "path",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": ["all", ["==", "class", "path"], ["!=", "bicycle", "yes"], ["!=", "bicycle", "designated"], ["!=", "subclass", "cycleway"]],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": "rgba(0, 102, 73, 1)",
+        "line-dasharray": [0, 2],
+        "line-width": 4
+      }
+    },
+    {
+      "id": "path-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "filter": ["==", "class", "path"],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-font": ["Stone Sans"],
+        "text-size": 12,
+        "text-offset": [0, 1]
+      },
+      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+    },
+    {
+      "id": "road-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "filter": ["in", "class", "motorway", "trunk", "primary", "secondary", "tertiary", "minor", "track"],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-font": ["Stone Sans"],
+        "text-size": 12,
+        "text-offset": [0, 1]
+      },
+      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+    },
+    {
+      "id": "water-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "water_name",
+      "layout": {
+        "text-field": "{name}",
+        "text-font": ["Stone Sans Italic"],
+        "text-size": 12
+      },
+      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+    }
+  ]
+}
