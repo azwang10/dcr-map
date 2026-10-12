@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>DCR Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
   <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/maplibre-contour@0.1.0/dist/index.min.js"></script>
@@ -11,16 +12,11 @@
     @font-face {
       font-family: "Stone Sans";
       src: url("StoneSans.otf") format("opentype");
-      font-weight: 400;
-      font-style: normal;
     }
     body { margin: 0; font-family: "Stone Sans", sans-serif; }
     html, body, #map { height: 100%; }
-    .maplibregl-ctrl-attrib,
-    .maplibregl-ctrl-attrib a,
-    .maplibregl-popup-content {
-      font-family: "Stone Sans", sans-serif;
-    }
+    .maplibregl-map { font-family: "Stone Sans", sans-serif; }
+
     #sidebar {
       position: absolute;
       z-index: 1;
@@ -30,13 +26,13 @@
       max-height: 100%;
       overflow: auto;
       background: #fff;
-      font: 14px/1.35 "Stone Sans", sans-serif;
+      font-size: 14px;
     }
     #sidebar h1 { margin: 0; font-size: 16px; }
     #sidebar h1 label { display: block; padding: 12px 14px; cursor: pointer; }
-    #controls-content { padding: 0 14px 14px; }
-    #sidebar-toggle:checked ~ #controls-content { display: none; }
-    #places { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+    #content { padding: 0 14px 14px; }
+    #toggle:checked ~ #content { display: none; }
+    #places { margin: 0; padding: 0; list-style: none; }
     #places button {
       width: 100%;
       padding: 6px 0;
@@ -44,58 +40,46 @@
       background: none;
       text-align: left;
       font: inherit;
-      color: rgb(0, 102, 73);
-      cursor: pointer;
-    }
-    #places button[aria-current="true"] { font-weight: 700; }
-    .control-button { display: inline-block; margin-top: 8px; cursor: pointer; }
-    #locate-me {
-      display: block;
-      margin: 10px 0 4px;
-      padding: 8px 10px;
-      border: 1px solid #006649;
-      border-radius: 4px;
-      background: #fff;
       color: #006649;
-      font: inherit;
       cursor: pointer;
     }
-    #location-status { margin: 4px 0 0; font-size: 12px; }
+    #places button[aria-current] { font-weight: 700; }
+    #hide { display: inline-block; margin-top: 8px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="sidebar">
-    <input id="sidebar-toggle" type="checkbox" hidden>
-    <h1><label for="sidebar-toggle">Parks</label></h1>
-    <div id="controls-content">
-      <ul id="places">
-        <li><button type="button" data-lng="-71.15614" data-lat="42.07081">Borderland State Park</button></li>
-        <li><button type="button" data-lng="-71.89235" data-lat="42.48693">Wachusett Mountain</button></li>
-        <li><button type="button" data-lng="-71.33864" data-lat="42.43760">Walden Pond</button></li>
-        <li><button type="button" data-lng="-73.17143" data-lat="42.54494">Ashuwillticook Rail Trail</button></li>
-        <li><button type="button" data-lng="-73.26912" data-lat="42.23144">Beartown State Forest</button></li>
-        <li><button type="button" data-lng="-71.62211" data-lat="42.11254">Blackstone River and Canal</button></li>
-        <li><button type="button" data-lng="-72.37736" data-lat="42.61872">Erving State Forest</button></li>
-        <li><button type="button" data-lng="-72.96976" data-lat="42.05438">Granville State Forest</button></li>
-        <li><button type="button" data-lng="-71.07410" data-lat="42.61274">Harold Parker State Forest</button></li>
-        <li><button type="button" data-lng="-72.94472" data-lat="42.62699">Mohawk Trail State Forest</button></li>
-        <li><button type="button" data-lng="-72.98583" data-lat="42.71586">Monroe State Forest</button></li>
-        <li><button type="button" data-lng="-72.35430" data-lat="42.69107">Mt. Grace State Forest</button></li>
-        <li><button type="button" data-lng="-73.48945" data-lat="42.07784">Mt. Washington State Forest</button></li>
-        <li><button type="button" data-lng="-72.10702" data-lat="42.62116">Otter River State Forest</button></li>
-        <li><button type="button" data-lng="-71.71692" data-lat="42.12873">Purgatory Chasm</button></li>
-        <li><button type="button" data-lng="-71.59744" data-lat="42.20303">Upton State Forest</button></li>
-        <li><button type="button" data-lng="-72.06873" data-lat="42.14509">Wells State Park</button></li>
-        <li><button type="button" data-lng="-72.43762" data-lat="42.56490">Wendell State Forest</button></li>
-        <li><button type="button" data-lng="-71.76902" data-lat="42.65522">Willard Brook State Forest</button></li>
-      </ul>
-      <button id="locate-me" type="button">Locate me</button>
-      <p id="location-status" role="status" aria-live="polite"></p>
-      <label class="control-button" for="sidebar-toggle">Hide sidebar</label>
+    <input id="toggle" type="checkbox" hidden>
+    <h1><label for="toggle">Parks</label></h1>
+    <div id="content">
+      <ul id="places"></ul>
+      <label id="hide" for="toggle">Hide sidebar</label>
     </div>
   </div>
   <script>
+    const parks = [
+      ["Borderland State Park", -71.15614, 42.07081],
+      ["Wachusett Mountain", -71.89235, 42.48693],
+      ["Walden Pond", -71.33864, 42.43760],
+      ["Ashuwillticook Rail Trail", -73.17143, 42.54494],
+      ["Beartown State Forest", -73.26912, 42.23144],
+      ["Blackstone River and Canal", -71.62211, 42.11254],
+      ["Erving State Forest", -72.37736, 42.61872],
+      ["Granville State Forest", -72.96976, 42.05438],
+      ["Harold Parker State Forest", -71.07410, 42.61274],
+      ["Mohawk Trail State Forest", -72.94472, 42.62699],
+      ["Monroe State Forest", -72.98583, 42.71586],
+      ["Mt. Grace State Forest", -72.35430, 42.69107],
+      ["Mt. Washington State Forest", -73.48945, 42.07784],
+      ["Otter River State Forest", -72.10702, 42.62116],
+      ["Purgatory Chasm", -71.71692, 42.12873],
+      ["Upton State Forest", -71.59744, 42.20303],
+      ["Wells State Park", -72.06873, 42.14509],
+      ["Wendell State Forest", -72.43762, 42.56490],
+      ["Willard Brook State Forest", -71.76902, 42.65522]
+    ];
+
     const dem = new mlcontour.DemSource({
       url: "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp",
       encoding: "terrarium",
@@ -106,12 +90,9 @@
     const map = new maplibregl.Map({
       container: "map",
       style: "dcr_style.json",
-      zoom: 11,
       center: [-71.19, 42.34],
-      pitch: 0,
-      maxPitch: 0,
-      pitchWithRotate: false,
-      touchPitch: false
+      zoom: 11,
+      maxPitch: 0
     });
 
     const geolocate = new maplibregl.GeolocateControl({
@@ -121,44 +102,33 @@
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     map.addControl(geolocate, "top-right");
+    map.on("load", () => geolocate.trigger());
 
-    // On iOS Safari, geolocation permission prompts are more reliable when
-    // location is requested directly from a user tap, not automatically on load.
-    const locateButton = document.getElementById("locate-me");
-    const locationStatus = document.getElementById("location-status");
+    const list = document.getElementById("places");
+    const toggle = document.getElementById("toggle");
 
-    locateButton.addEventListener("click", () => {
-      locationStatus.textContent = "Requesting your location…";
-      geolocate.trigger();
-    });
-
-    geolocate.on("geolocate", () => {
-      locationStatus.textContent = "Location found.";
-    });
-
-    geolocate.on("error", (event) => {
-      const message = event && event.message ? event.message : "Location is unavailable.";
-      locationStatus.textContent = message +
-        " Check Safari location permission and make sure this page is served over HTTPS.";
-    });
-
-    const places = document.getElementById("places");
-    places.addEventListener("click", (event) => {
-      const button = event.target.closest("button");
-      if (!button) return;
-      const locate = document.querySelector(".maplibregl-ctrl-geolocate");
-      if (locate && (locate.classList.contains("maplibregl-ctrl-geolocate-active") || locate.classList.contains("maplibregl-ctrl-geolocate-background"))) {
-        locate.click();
-      }
-      for (const item of places.querySelectorAll("button")) item.removeAttribute("aria-current");
-      button.setAttribute("aria-current", "true");
-      const hidden = document.getElementById("sidebar-toggle").checked;
-      map.flyTo({
-        center: [Number(button.dataset.lng), Number(button.dataset.lat)],
-        zoom: 13,
-        padding: { left: hidden ? 0 : 240 }
+    for (const [name, lng, lat] of parks) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = name;
+      button.addEventListener("click", () => {
+        // Stop following the user so the map can fly to the park.
+        const locate = document.querySelector(".maplibregl-ctrl-geolocate");
+        if (locate.matches(".maplibregl-ctrl-geolocate-active, .maplibregl-ctrl-geolocate-background")) {
+          locate.click();
+        }
+        list.querySelector("[aria-current]")?.removeAttribute("aria-current");
+        button.setAttribute("aria-current", "true");
+        map.flyTo({
+          center: [lng, lat],
+          zoom: 13,
+          padding: { left: toggle.checked ? 0 : 240 }
+        });
       });
-    });
+      const item = document.createElement("li");
+      item.append(button);
+      list.append(item);
+    }
   </script>
 </body>
 </html>
