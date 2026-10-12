@@ -13,9 +13,9 @@
       font-family: "Stone Sans";
       src: url("StoneSans.otf") format("opentype");
     }
-    body { margin: 0; font-family: "Stone Sans", sans-serif; }
+    body { margin: 0; font: 14px "Stone Sans", sans-serif; }
     html, body, #map { height: 100%; }
-    .maplibregl-map { font-family: "Stone Sans", sans-serif; }
+    .maplibregl-map, .maplibregl-ctrl-attrib-inner { font: 14px/20px "Stone Sans", sans-serif; }
 
     #sidebar {
       position: absolute;
@@ -26,9 +26,8 @@
       max-height: 100%;
       overflow: auto;
       background: #fff;
-      font-size: 14px;
     }
-    #sidebar h1 { margin: 0; font-size: 16px; }
+    #sidebar h1 { margin: 0; font-size: 14px; }
     #sidebar h1 label { display: block; padding: 12px 14px; cursor: pointer; }
     #content { padding: 0 14px 14px; }
     #toggle:checked ~ #content { display: none; }
@@ -92,7 +91,8 @@
       style: "dcr_style.json",
       center: [-71.19, 42.34],
       zoom: 11,
-      maxPitch: 0
+      maxPitch: 0,
+      attributionControl: false
     });
 
     const geolocate = new maplibregl.GeolocateControl({
@@ -102,7 +102,15 @@
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     map.addControl(geolocate, "top-right");
-    map.on("load", () => geolocate.trigger());
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+
+    map.on("load", () => {
+      geolocate.trigger();
+      // Collapse the attribution to its (i) button right away.
+      const attribution = document.querySelector(".maplibregl-ctrl-attrib");
+      attribution.removeAttribute("open");
+      attribution.classList.remove("maplibregl-compact-show");
+    });
 
     const list = document.getElementById("places");
     const toggle = document.getElementById("toggle");

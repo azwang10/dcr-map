@@ -1,7 +1,5 @@
 {
   "version": 8,
-  "name": "DCR Style",
-  "metadata": {"maputnik:renderer": "mlgljs"},
   "sources": {
     "openmaptiles": {
       "type": "vector",
@@ -140,7 +138,7 @@
       "layout": {
         "text-field": "{name}",
         "text-font": ["Stone Sans Italic"],
-        "text-size": 12
+        "text-size": 14
       },
       "paint": {"text-color": "rgba(0, 102, 73, 1)"}
     },
@@ -154,7 +152,7 @@
         "symbol-placement": "line",
         "text-field": "{name}",
         "text-font": ["Stone Sans Italic"],
-        "text-size": 12,
+        "text-size": 14,
         "text-offset": [0, 1]
       },
       "paint": {"text-color": "rgba(0, 102, 73, 1)"}
@@ -180,11 +178,10 @@
         "symbol-placement": "line",
         "text-field": "{name}",
         "text-font": ["Stone Sans"],
-        "text-size": 12,
+        "text-size": 14,
         "text-offset": [0, 1]
       },
       "paint": {"text-color": "rgba(0, 102, 73, 1)"}
     }
-  ],
-  "id": "wv8vyus"
+  ]
 }
