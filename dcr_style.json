@@ -80,8 +80,7 @@
       "filter": [
         "all",
         ["==", "class", "path"],
-        ["!=", "bicycle", "yes"],
-        ["!=", "subclass", "platform"]
+        ["!=", "bicycle", "yes"]
       ],
       "layout": {"line-cap": "round", "line-join": "round"},
       "paint": {

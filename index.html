@@ -93,7 +93,11 @@
       container: "map",
       style: "dcr_style.json",
       zoom: 11,
-      center: [-71.19, 42.34]
+      center: [-71.19, 42.34],
+      pitch: 0,
+      maxPitch: 0,
+      pitchWithRotate: false,
+      touchPitch: false
     });
 
     const geolocate = new maplibregl.GeolocateControl({
