@@ -1,7 +1,7 @@
 {
   "version": 8,
   "name": "DCR Style",
-  "glyphs": "glyphs/{fontstack}/{range}.pbf",
+  "metadata": {"maputnik:renderer": "mlgljs"},
   "sources": {
     "openmaptiles": {
       "type": "vector",
@@ -10,11 +10,19 @@
     "contours": {
       "type": "vector",
       "tiles": [
-        "dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=3.28084&overzoom=1&thresholds=11*5"
+        "dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=3.28084&overzoom=1&thresholds=11*10"
       ],
       "maxzoom": 15
+    },
+    "hillshade": {
+      "type": "raster-dem",
+      "encoding": "terrarium",
+      "tiles": ["dem-shared://{z}/{x}/{y}"],
+      "maxzoom": 12,
+      "tileSize": 256
     }
   },
+  "glyphs": "glyphs/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "bg",
@@ -27,6 +35,28 @@
       "source": "openmaptiles",
       "source-layer": "park",
       "paint": {"fill-color": "rgba(253, 254, 255, 1)"}
+    },
+    {
+      "id": "hillshade",
+      "type": "hillshade",
+      "source": "hillshade",
+      "paint": {
+        "hillshade-exaggeration": 0.65,
+        "hillshade-shadow-color": "rgba(0, 55, 40, 0.55)",
+        "hillshade-highlight-color": "rgba(255, 255, 255, 0.3)",
+        "hillshade-accent-color": "rgba(0, 55, 40, 0.22)"
+      }
+    },
+    {
+      "id": "contour",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "rgba(0, 102, 73, 0.3)",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.3, 16, 0.8]
+      }
     },
     {
       "id": "water",
@@ -43,42 +73,16 @@
       "paint": {"line-color": "rgba(137, 168, 155, 1)", "line-width": 2}
     },
     {
-      "id": "contour",
-      "type": "line",
-      "source": "contours",
-      "source-layer": "contours",
-      "minzoom": 11,
-      "paint": {
-        "line-color": "rgba(0, 102, 73, 0.3)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.3, 16, 0.8]
-      }
-    },
-    {
-      "id": "road",
-      "type": "line",
-      "source": "openmaptiles",
-      "source-layer": "transportation",
-      "filter": ["all", ["!=", "class", "path"], ["!=", "class", "ferry"]],
-      "paint": {"line-color": "rgba(0, 102, 73, 1)", "line-width": 4}
-    },
-    {
-      "id": "bike",
-      "type": "line",
-      "source": "openmaptiles",
-      "source-layer": "transportation",
-      "filter": ["all", ["==", "class", "path"], ["any", ["==", "bicycle", "yes"], ["==", "bicycle", "designated"], ["==", "subclass", "cycleway"]]],
-      "paint": {
-        "line-color": "rgba(0, 102, 73, 1)",
-        "line-dasharray": [0.1, 0.7],
-        "line-width": 7
-      }
-    },
-    {
       "id": "path",
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
-      "filter": ["all", ["==", "class", "path"], ["!=", "bicycle", "yes"], ["!=", "bicycle", "designated"], ["!=", "subclass", "cycleway"]],
+      "filter": [
+        "all",
+        ["==", "class", "path"],
+        ["!=", "bicycle", "yes"],
+        ["!=", "subclass", "platform"]
+      ],
       "layout": {"line-cap": "round", "line-join": "round"},
       "paint": {
         "line-color": "rgba(0, 102, 73, 1)",
@@ -87,34 +91,47 @@
       }
     },
     {
-      "id": "path-label",
-      "type": "symbol",
+      "id": "bike",
+      "type": "line",
       "source": "openmaptiles",
-      "source-layer": "transportation_name",
-      "filter": ["==", "class", "path"],
-      "layout": {
-        "symbol-placement": "line",
-        "text-field": "{name}",
-        "text-font": ["Stone Sans"],
-        "text-size": 12,
-        "text-offset": [0, 1]
-      },
-      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+      "source-layer": "transportation",
+      "filter": ["all", ["==", "class", "path"], ["==", "bicycle", "yes"]],
+      "paint": {
+        "line-color": "rgba(0, 102, 73, 1)",
+        "line-dasharray": [0.2, 0.6],
+        "line-width": 6
+      }
     },
     {
-      "id": "road-label",
-      "type": "symbol",
+      "id": "track-outside",
+      "type": "line",
       "source": "openmaptiles",
-      "source-layer": "transportation_name",
-      "filter": ["in", "class", "motorway", "trunk", "primary", "secondary", "tertiary", "minor", "track"],
-      "layout": {
-        "symbol-placement": "line",
-        "text-field": "{name}",
-        "text-font": ["Stone Sans"],
-        "text-size": 12,
-        "text-offset": [0, 1]
-      },
-      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+      "source-layer": "transportation",
+      "filter": ["==", "class", "track"],
+      "paint": {"line-color": "rgba(0, 102, 73, 1)", "line-width": 5}
+    },
+    {
+      "id": "track-inside",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": ["==", "class", "track"],
+      "paint": {"line-color": "rgba(255, 255, 255, 1)", "line-width": 3}
+    },
+    {
+      "id": "road",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        ["!=", "class", "path"],
+        ["!=", "class", "ferry"],
+        ["!=", "class", "track"],
+        ["!=", "class", "rail"],
+        ["!=", "class", "aerialway"]
+      ],
+      "paint": {"line-color": "rgba(0, 102, 73, 1)", "line-width": 4}
     },
     {
       "id": "water-label",
@@ -127,6 +144,33 @@
         "text-size": 12
       },
       "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+    },
+    {
+      "id": "way-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "filter": [
+        "in",
+        "class",
+        "motorway",
+        "trunk",
+        "primary",
+        "secondary",
+        "tertiary",
+        "minor",
+        "track",
+        "path"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-font": ["Stone Sans"],
+        "text-size": 12,
+        "text-offset": [0, 1]
+      },
+      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
     }
-  ]
+  ],
+  "id": "wv8vyus"
 }
