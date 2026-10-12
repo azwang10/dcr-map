@@ -145,6 +145,21 @@
       "paint": {"text-color": "rgba(0, 102, 73, 1)"}
     },
     {
+      "id": "waterway-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "waterway",
+      "filter": ["has", "name"],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-font": ["Stone Sans Italic"],
+        "text-size": 12,
+        "text-offset": [0, 1]
+      },
+      "paint": {"text-color": "rgba(0, 102, 73, 1)"}
+    },
+    {
       "id": "way-label",
       "type": "symbol",
       "source": "openmaptiles",

@@ -49,6 +49,18 @@
     }
     #places button[aria-current="true"] { font-weight: 700; }
     .control-button { display: inline-block; margin-top: 8px; cursor: pointer; }
+    #locate-me {
+      display: block;
+      margin: 10px 0 4px;
+      padding: 8px 10px;
+      border: 1px solid #006649;
+      border-radius: 4px;
+      background: #fff;
+      color: #006649;
+      font: inherit;
+      cursor: pointer;
+    }
+    #location-status { margin: 4px 0 0; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -78,6 +90,8 @@
         <li><button type="button" data-lng="-72.43762" data-lat="42.56490">Wendell State Forest</button></li>
         <li><button type="button" data-lng="-71.76902" data-lat="42.65522">Willard Brook State Forest</button></li>
       </ul>
+      <button id="locate-me" type="button">Locate me</button>
+      <p id="location-status" role="status" aria-live="polite"></p>
       <label class="control-button" for="sidebar-toggle">Hide sidebar</label>
     </div>
   </div>
@@ -107,7 +121,26 @@
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     map.addControl(geolocate, "top-right");
-    map.on("load", () => geolocate.trigger());
+
+    // On iOS Safari, geolocation permission prompts are more reliable when
+    // location is requested directly from a user tap, not automatically on load.
+    const locateButton = document.getElementById("locate-me");
+    const locationStatus = document.getElementById("location-status");
+
+    locateButton.addEventListener("click", () => {
+      locationStatus.textContent = "Requesting your location…";
+      geolocate.trigger();
+    });
+
+    geolocate.on("geolocate", () => {
+      locationStatus.textContent = "Location found.";
+    });
+
+    geolocate.on("error", (event) => {
+      const message = event && event.message ? event.message : "Location is unavailable.";
+      locationStatus.textContent = message +
+        " Check Safari location permission and make sure this page is served over HTTPS.";
+    });
 
     const places = document.getElementById("places");
     places.addEventListener("click", (event) => {
